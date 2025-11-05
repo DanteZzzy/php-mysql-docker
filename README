@@ -1,0 +1,201 @@
+✨🐳 **Aplicação PHP + MySQL com Docker** ✨
+
+Este projeto demonstra uma aplicação **PHP** simples integrada a um banco de dados **MySQL**, executando de forma isolada em containers **Docker**.
+A aplicação permite **cadastrar** e **listar usuários** através de uma interface web amigável.
+
+---
+
+## 📁 **Estrutura de Pastas**
+
+```
+.
+├── docker-compose.yml     📦 Arquivo de orquestração dos containers
+├── Dockerfile             ⚙️ Configuração da imagem PHP + Apache
+├── index.php              🧾 Página principal de cadastro
+├── listar.php             📋 Página de listagem de usuários
+└── db/
+    └── init.sql           🗄️ Script SQL de criação da tabela 'users'
+```
+
+---
+
+## 🧰 **Tecnologias Utilizadas**
+
+* 🐘 **PHP 7.4 + Apache**
+* 🐬 **MySQL 5.7**
+* 🐳 **Docker & Docker Compose**
+* 🎨 **HTML + CSS (básico)**
+
+---
+
+## 🚀 **Como Executar o Projeto**
+
+### 🔹 1️⃣ Pré-requisitos
+
+Antes de iniciar, instale:
+
+* [Docker](https://docs.docker.com/get-docker/)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+---
+
+### 🔹 2️⃣ Clonar o repositório
+
+```bash
+git clone https://github.com/seuusuario/php-mysql-docker.git
+cd php-mysql-docker
+```
+
+---
+
+### 🔹 3️⃣ Subir os containers
+
+```bash
+docker-compose up -d --build
+```
+
+📦 Isso criará e iniciará dois containers:
+
+* **web** → Servidor Apache com PHP
+* **db** → Banco de dados MySQL
+
+---
+
+### 🔹 4️⃣ Acessar a aplicação
+
+Abra o navegador e acesse:
+👉 **[http://localhost:8080](http://localhost:8080)**
+
+Você verá a página de **cadastro de usuário**. 🎉
+
+---
+
+## 🗄️ **Banco de Dados**
+
+O banco é criado automaticamente via script `db/init.sql`.
+
+### 🧾 Estrutura da tabela
+
+```sql
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL
+);
+```
+
+### ⚙️ Configurações do MySQL
+
+| Variável de Ambiente  | Valor        |
+| --------------------- | ------------ |
+| `MYSQL_ROOT_PASSWORD` | rootpassword |
+| `MYSQL_DATABASE`      | user_db      |
+| `MYSQL_USER`          | user         |
+| `MYSQL_PASSWORD`      | userpassword |
+
+---
+
+## 💻 **Arquivos Principais**
+
+### 🧩 `Dockerfile`
+
+Cria a imagem do servidor PHP com Apache e habilita o módulo `mysqli`:
+
+```dockerfile
+FROM php:7.4-apache
+RUN docker-php-ext-install mysqli
+RUN a2enmod rewrite
+COPY . /var/www/html/
+EXPOSE 80
+```
+
+---
+
+### ⚙️ `docker-compose.yml`
+
+Orquestra os serviços de **web** e **db** dentro de uma rede Docker:
+
+```yaml
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: user_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+---
+
+### 🧾 `index.php`
+
+Página principal responsável pelo **cadastro de novos usuários**.
+Contém um formulário HTML que envia os dados via **POST** e insere-os no banco de dados com proteção contra SQL Injection.
+
+---
+
+### 📋 `listar.php`
+
+Página que exibe todos os usuários cadastrados, apresentando os dados em uma tabela HTML estilizada.
+
+---
+
+## 🧠 **Fluxo da Aplicação**
+
+1. O usuário acessa `index.php`
+2. Preenche **nome** e **e-mail** e clica em **Cadastrar**
+3. Os dados são salvos no banco `user_db`
+4. O botão **“Ver usuários cadastrados”** leva à página `listar.php`
+5. Os usuários são listados em ordem decrescente de cadastro
+
+---
+
+## 🔧 **Comandos Úteis**
+
+| Comando                                                  | Descrição                        |
+| -------------------------------------------------------- | -------------------------------- |
+| `docker-compose up -d`                                   | Inicia os containers             |
+| `docker-compose down`                                    | Para e remove containers         |
+| `docker ps`                                              | Lista containers em execução     |
+| `docker logs web`                                        | Mostra logs do container PHP     |
+| `docker exec -it web bash`                               | Abre o terminal do container PHP |
+| `docker exec -it db mysql -uuser -puserpassword user_db` | Acessa o banco MySQL diretamente |
+
+---
+
+## 🧹 **Limpeza do Ambiente**
+
+Para remover containers, imagens e volumes criados:
+
+```bash
+docker-compose down --volumes --rmi all
+```
+
+---
+
+## 🧑‍💻 **Autor e Licença**
+
+📜 Este projeto é de uso **livre para fins educacionais**.
+
+---
+
